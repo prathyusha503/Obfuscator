@@ -14,7 +14,7 @@ export default function OptionsPanel({ options, setOptions }) {
         <label className="block text-sm font-medium">Passes</label>
         <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
           {['string-encrypt','rename-symbols','bogus-insert','cfg-flatten'].map(p => (
-            <label key={p} className="inline-flex items-center gap-2">
+      <label key={p} className="inline-flex items-center gap-2">
               <input type="checkbox" checked={options.passes.includes(p)} onChange={e => {
                 const checked = e.target.checked
                 setOptions(prev => ({
