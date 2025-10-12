@@ -1,115 +1,145 @@
-import { useState } from 'react'
-import CodeEditor from '../components/CodeEditor'
-import OptionsPanel from '../components/OptionsPanel'
-import ReportCard from '../components/ReportCard'
-import { motion } from 'framer-motion'
 
-export default function Home() {
-  const [code, setCode] = useState(`#include <stdio.h>\nint main(){printf("Hello SIH\\n");return 0;}`)
-  const [options, setOptions] = useState({ level: 'medium', passes: [], bogusCount: 10 })
-  const [loading, setLoading] = useState(false)
-  const [report, setReport] = useState(null)
-  const [downloadUrl, setDownloadUrl] = useState(null)
-  const [error, setError] = useState(null)
+// import { useEffect } from 'react'
+// import { useRouter } from 'next/router'
+// import { getRole } from '../lib/auth' 
+// // Ensure '../lib/auth' is the correct path to your authentication file
 
-  async function handleSubmit() {
-    setError(null)
-    setLoading(true)
-    setReport(null)
-    setDownloadUrl(null)
+// export default function IndexPage() {
+//   const router = useRouter()
 
-    try {
-      const res = await fetch('http://localhost:4000/api/obfuscate', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ code, options })
-      })
+//   useEffect(() => {
+//     // This runs after the page loads to check the user's role
+//     const role = getRole()
 
-      // try to parse JSON body (error details may be inside)
-      const json = await res.json().catch(() => null)
+//     if (role === 'admin') {
+//       router.replace('/dashboard') // Admin goes straight to dashboard
+//     } else if (role === 'user') {
+//       router.replace('/home') // Regular user goes to home/obfuscator UI
+//     } else {
+//       // ⚠️ REQUIRED CHANGE: Redirect unauthenticated users to the login page
+//       router.replace('/login')
+//     }
+//   }, [router])
 
-      if (!res.ok) {
-        // if server returned JSON with message, show it; otherwise show status
-        const msg = (json && (json.error || json.message)) ? (json.error || json.message) : `Server error ${res.status}`
-        throw new Error(msg)
-      }
+//   // Show a brief loading screen while the routing logic is executed
+//   return (
+//     <div className="min-h-screen flex items-center justify-center text-xl text-gray-400">
+//       Loading...
+//     </div>
+//   )
+// }
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
+import { getRole } from '../lib/auth';
+import Image from 'next/image';
 
-      // expected response: { jobId, report, downloadUrl }
-      setReport(json.report || null)
-      setDownloadUrl(json.downloadUrl || null)
-    } catch (e) {
-      setError(e.message || 'An unknown error occurred')
-    } finally {
-      setLoading(false)
+const buttonClass = "px-6 py-3 rounded-full font-semibold text-lg transition duration-300 transform hover:scale-105 shadow-xl";
+
+export default function IndexPage() {
+  const router = useRouter();
+  const role = getRole();
+  const isLoggedIn = !!role;
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      router.replace(role === 'admin' ? '/dashboard' : '/home');
     }
+  }, [isLoggedIn, role, router]);
+
+  if (isLoggedIn) {
+    return <div className="min-h-screen flex items-center justify-center text-xl text-gray-400">Redirecting...</div>;
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-  <motion.section layout className="lg:col-span-2">
-    <div className="code-card shadow-xl transition-transform hover:scale-[1.01]">
-      <CodeEditor value={code} onChange={setCode} />
-      <div className="flex gap-2 mt-4">
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          className="px-4 py-2 bg-primary text-white rounded-md hover:opacity-90"
-        >
-          {loading ? 'Obfuscating...' : 'Obfuscate'}
-        </button>
-        <button
-          onClick={() => setCode('')}
-          className="px-4 py-2 border rounded-md"
-        >
-          Clear
-        </button>
+    <div className="min-h-screen text-white overflow-hidden relative"> 
+      
+      {/* Header (Custom Header for Landing Page) */}
+      <header className="absolute top-0 left-0 w-full pt-4 pb-2 px-6 z-20">
+        <div className="flex justify-between items-center container mx-auto px-6">
+          
+          {/* Logo/Title Area (Simple) */}
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 rounded-md bg-purple-600 flex items-center justify-center font-bold text-white text-sm">OB</div>
+            <p className="text-white text-sm">LLVM-based obfuscation — prototype</p>
+          </div>
+          
+          {/* Sign In Button (Right Side) */}
+          <Link href="/login" 
+            className="text-white text-sm px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 font-semibold shadow-md"
+          >
+            Sign In
+          </Link>
+        </div>
+      </header>
+      
+      {/* Main Content Area */}
+      <div className="container mx-auto px-6 pt-48 pb-20 relative z-10">
+        
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          
+          {/* LEFT COLUMN: Text Content and Buttons */}
+          <div className="max-w-xl">
+            
+            {/* Obfusclang UI Title (Prominent) */}
+            <div className="flex items-center space-x-4 mb-2">
+              <div className="w-14 h-14 rounded-lg bg-purple-600 flex items-center justify-center font-bold text-2xl">OB</div>
+              {/* ⚠️ FIX: Applied custom class to force large size */}
+              <h1 className="title-lg font-extrabold text-white">Obfusclang UI</h1> 
+            </div>
+            
+            <p className="text-2xl text-purple-300 mb-12">LLVM-based obfuscation — prototype</p> 
+            
+            {/* UNLOCK CODE SECURITY - CRITICAL STYLING */}
+            {/* ⚠️ FIX: Applied custom class for glow and massive size */}
+            <h2 
+              className="glow-title" 
+            >
+              UNLOCK CODE SECURITY
+            </h2>
+            
+            <p className="text-xl max-w-lg text-gray-400 mb-12">
+              Advanced LLVM-based obfuscation for robust software protection.
+            </p>
+            
+            {/* Buttons */}
+            <div className="flex space-x-6">
+              <button
+                className={`${buttonClass} bg-gradient-to-r from-pink-500 to-purple-600 text-white`}
+              >
+                Learn More
+              </button>
+              
+              <Link href="/login"
+                className={`${buttonClass} bg-gradient-to-r from-cyan-400 to-blue-500 text-white flex items-center justify-center`}
+              >
+                Try Now
+              </Link>
+            </div>
+          </div>
+          
+          {/* RIGHT COLUMN: The Image */}
+          <div className="flex justify-center lg:justify-end h-full">
+            <Image 
+              src="/backgorund.jpg" // Ensure this is the correct path to your image
+              alt="Futuristic glowing chip and circuit board"
+              width={750} 
+              height={750} 
+              objectFit="contain"
+              className="max-w-full h-auto opacity-90"
+            />
+          </div>
+        </div>
       </div>
-      {error && <div className="mt-3 text-red-500">{error}</div>}
+
+      {/* Footer (Absolute Positioning) */}
+      <footer className="absolute bottom-0 w-full p-4 text-gray-500 text-xs z-10">
+        <div className="container mx-auto flex justify-center items-center space-x-6">
+          <p>Privacy Policy</p>
+          <p>Terms of Service</p>
+          <p>Contact Us</p>
+        </div>
+      </footer>
     </div>
-  </motion.section>
-
-      <aside className="space-y-4">
-        <motion.div layout className="code-card shadow-xl transition-transform hover:scale-[1.01]">
-          <OptionsPanel options={options} setOptions={setOptions} />
-        </motion.div>
-
-        <motion.div layout className="code-card shadow-xl transition-transform hover:scale-[1.01]">
-          <ReportCard report={report} />
-          {downloadUrl && (
-    <div className="mt-3">
-      <a
-        href={downloadUrl}
-        download // hint to browser to download instead of navigate
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Download obfuscated file"
-        className="button inline-flex items-center" // `button` is the custom CSS class, keep extra Tailwind classes if needed
-      >
-        {/* decorative spinning stripe behind */}
-        <div className="dots_border" aria-hidden="true"></div>
-
-        {/* sparkle icon (SVG). Adjust the path if you want a different icon */}
-        <svg
-          className="sparkle"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          width="28"
-          height="28"
-          aria-hidden="true"
-        >
-          <path className="path" d="M12 2v20M5 15l7 7 7-7" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-          <path className="path" d="M12 6l1.5 3 3 1.5-3 1.5L12 15l-1.5-3L7 10.5l3-1.5L12 6z" fill="currentColor" />
-        </svg>
-
-        {/* visible button text (styled by .text_button) */}
-        <span className="text_button">Download</span>
-      </a>
-    </div>
-    )}
-
-        </motion.div>
-      </aside>
-    </div>
-  )
+  );
 }
-
